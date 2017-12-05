@@ -58,10 +58,8 @@ is_type_hu(Type, [#{index := Index1 } = First | Mahjongs]) ->
                 false ->
                     [#{index := Index2}, #{index := Index3}] = Part1,
                     case Index1 + 1 =:= Index2 andalso Index2 + 1 =:= Index3 of
-                        true ->
-                            is_type_hu(Type, Part2);
-                        false ->
-                            false
+                        true -> is_type_hu(Type, Part2);
+                        false -> false
                     end
             end
     end.
@@ -87,10 +85,8 @@ arrange(Mahjongs) ->
 order(Mahjongs) ->
     Fun = fun(#{type := Type1, index := Index1}, #{type := Type2, index := Index2}) ->
                   if
-                      Type1 == Type2 ->
-                          Index1 =< Index2;
-                      true ->
-                          Type1 > Type2
+                      Type1 == Type2 -> Index1 =< Index2;
+                      true -> Type1 > Type2
                   end
           end,
     lists:sort(Fun, Mahjongs).
