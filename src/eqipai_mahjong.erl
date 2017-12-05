@@ -56,10 +56,16 @@ is_type_hu(Type, [#{index := Index1 } = First | Mahjongs]) ->
                 true ->
                     false;
                 false ->
-                    [#{index := Index2}, #{index := Index3}] = Part1,
-                    case Index1 + 1 =:= Index2 andalso Index2 + 1 =:= Index3 of
-                        true -> is_type_hu(Type, Part2);
-                        false -> false
+                    case lists:delete(#{type => Type, index => Index1+1}, Mahjongs) of
+                        Mahjongs ->
+                            false;
+                        RemovedSecondMahjongs ->
+                            case lists:delete(#{type => Type, index => Index1+2}, RemovedSecondMahjongs) of
+                                RemovedSecondMahjongs ->
+                                    false;
+                                NewMahjongs ->
+                                    is_type_hu(Type, NewMahjongs)
+                            end
                     end
             end
     end.
