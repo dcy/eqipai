@@ -1,0 +1,17 @@
+{application, eqipai,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, { eqipai_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    eutil
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.
