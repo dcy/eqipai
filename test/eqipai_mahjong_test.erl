@@ -1,12 +1,13 @@
 -module(eqipai_mahjong_test).
 -include_lib("eunit/include/eunit.hrl").
+-compile(export_all).
 
 mahjong_test_() ->
-    [?_assert(eqipai_mahjong:is_hu(gen_mahjongs1()) == true),
-     ?_assert(eqipai_mahjong:is_hu(gen_mahjongs2()) == true),
+    [?_assert(element(1, eqipai_mahjong:is_hu(gen_mahjongs1())) == true),
+     ?_assert(element(1, eqipai_mahjong:is_hu(gen_mahjongs2())) == true),
      ?_assert(eqipai_mahjong:is_hu(gen_mahjongs3()) == false),
      ?_assert(eqipai_mahjong:is_hu(gen_mahjongs4()) == false),
-     ?_assert(eqipai_mahjong:is_hu(gen_mahjongs5()) == true)
+     ?_assert(element(1, eqipai_mahjong:is_hu(gen_mahjongs5())) == true)
     ].
 
 %% true 一万，二万，三万，两条，两条
