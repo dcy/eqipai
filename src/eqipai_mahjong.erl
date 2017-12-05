@@ -1,6 +1,8 @@
 -module(eqipai_mahjong).
 
--export([is_hu/1]).
+-export([is_hu/1,
+         get_hu_need_mahjongs/1
+        ]).
 
 %%%%%%%%%%%%%%%%%%备注%%%%%%%%%%%%%%%%%%%
 %%%万：wang
@@ -13,9 +15,12 @@
 %%%东是#{type => zi, index => 1}, 南是#{type => zi, index => 2}, 顺序东南西北中发白
 
 
+%%判断是否胡牌了
 %%不带赖子鬼牌
 %%N*3 + 2模式
--type mahjong() :: map().
+-type type() :: tong | wang | tiao | zi.
+-type index() :: integer.
+-type mahjong() :: #{type() => index()}.
 -spec is_hu(L :: list(mahjong())) ->
     R :: {true, _hu_info} | false.
 is_hu(Mahjongs) ->
@@ -32,7 +37,7 @@ is_hu([#{type := Type} = Mahjong | Multis], Infos) ->
     NewInfos = maps:put(Type, RemovedMahjongs, Infos),
 
     case is_type_hu(maps:to_list(NewInfos)) of
-        true -> 
+        true ->
             HuInfo = #{double => get_double(), triples => get_triples()},
             {true, HuInfo};
         false ->
@@ -78,6 +83,60 @@ is_type_hu(Type, [#{index := Index1 } = First | Mahjongs]) ->
                     end
             end
     end.
+
+%% 叫胡，叫哪些牌
+-spec get_hu_need_mahjongs(L :: list(mahjong())) ->
+    R :: list.
+get_hu_need_mahjongs(Mahjongs) ->
+    PossibleMahjongs = get_hu_possible_mahjongs(Mahjongs),
+    Fun = fun(Mahjong, AccInfos) ->
+                  NewMahjongs = [Mahjong | Mahjongs],
+                  case is_hu(NewMahjongs) of
+                      {true, HuInfo} -> [#{need => Mahjong, hu_info => HuInfo} | AccInfos];
+                      false -> AccInfos
+                  end
+          end,
+    lists:foldl(Fun, [], PossibleMahjongs).
+
+get_hu_possible_mahjongs(Mahjongs) ->
+    Fun = fun(#{type := Type, index := Index} = Mahjong, AccNeeds) ->
+                  AddedCurMahjongs = case lists:member(Mahjong, AccNeeds) of
+                                         true -> AccNeeds;
+                                         false -> [Mahjong | AccNeeds]
+                                     end,
+                  AddedPreMahjongs = case Index of
+                                         1 ->
+                                             AddedCurMahjongs;
+                                         _ ->
+                                             case Type == zi of
+                                                 true ->
+                                                     AddedCurMahjongs;
+                                                 false ->
+                                                     PreMahjong = #{type => Type, index => Index -1},
+                                                     case lists:member(PreMahjong, AddedCurMahjongs) of
+                                                         true -> AddedCurMahjongs;
+                                                         false -> [PreMahjong | AddedCurMahjongs]
+                                                     end
+                                             end
+                                     end,
+                  AddedNextMahjongs = case Index of
+                                          9 ->
+                                              AddedPreMahjongs;
+                                          _ ->
+                                              case Type == zi of
+                                                  true ->
+                                                      AddedPreMahjongs;
+                                                  false ->
+                                                      NextMahjong = #{type => Type, index => Index + 1},
+                                                      case lists:member(NextMahjong, AddedPreMahjongs) of
+                                                          true -> AddedPreMahjongs;
+                                                          false -> [NextMahjong | AddedPreMahjongs]
+                                                      end
+                                              end
+                                      end,
+                  AddedNextMahjongs
+          end,
+    lists:foldl(Fun, [], Mahjongs).
 
 arrange(Mahjongs) ->
     Fun = fun(#{type:= Type} = Mahjong, {LastMahjong, AccMultis, AccInfos}) ->
