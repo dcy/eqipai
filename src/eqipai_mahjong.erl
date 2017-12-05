@@ -42,31 +42,27 @@ is_type_hu([{Type, Mahjongs} | List]) ->
         false -> false
     end.
 
-is_type_hu(zi, []) ->
-    true;
-is_type_hu(zi, Mahjongs) when length(Mahjongs) rem 3 =/= 0 ->
-    false;
-is_type_hu(zi, [First | Mahjongs]) ->
-    {Part1, Part2} = lists:split(2, Mahjongs),
-    case Part1 == [First, First] of
-        true -> is_type_hu(zi, Part2);
-        false -> false
-    end;
-
 is_type_hu(_, []) ->
     true;
 is_type_hu(_, Mahjongs) when length(Mahjongs) rem 3 =/= 0 ->
     false;
-is_type_hu(Type, [#{index := Index1} = First | Mahjongs]) ->
+is_type_hu(Type, [#{index := Index1 } = First | Mahjongs]) ->
     {Part1, Part2} = lists:split(2, Mahjongs),
     case Part1 == [First, First] of
         true ->
             is_type_hu(Type, Part2);
         false ->
-            [#{index := Index2}, #{index := Index3}] = Part1,
-            case Index1 + 1 =:= Index2 andalso Index2 + 1 =:= Index3 of
-                true -> is_type_hu(Type, Part2);
-                false -> false
+            case Type == zi of
+                true ->
+                    false;
+                false ->
+                    [#{index := Index2}, #{index := Index3}] = Part1,
+                    case Index1 + 1 =:= Index2 andalso Index2 + 1 =:= Index3 of
+                        true ->
+                            is_type_hu(Type, Part2);
+                        false ->
+                            false
+                    end
             end
     end.
 
